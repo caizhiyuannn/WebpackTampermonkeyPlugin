@@ -1,0 +1,22 @@
+{
+  "name": "webpack-tampermonkey-plugin",
+  "version": "1.0.0",
+  "description": "Collect webpack resources to generate tampermonkey meta.js",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caizhiyuannn/WebpackTampermonkeyPlugin.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caizhiyuannn/WebpackTampermonkeyPlugin/issues"
+  },
+  "homepage": "https://github.com/caizhiyuannn/WebpackTampermonkeyPlugin#readme",
+  "dependencies": {
+    "cosmiconfig": "^6.0.0",
+    "deepmerge": "^4.2.2"
+  }
+}
