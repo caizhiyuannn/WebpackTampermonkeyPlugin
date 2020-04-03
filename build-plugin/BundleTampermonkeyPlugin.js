@@ -1,4 +1,3 @@
-const fs = require('fs');
 const path = require('path');
 const deepMerge = require('deepmerge');
 const { genMeta, envFileName, isEnvDevelopment } = require('./build-meta');
@@ -27,7 +26,7 @@ function feedRequireValue(assets, requireValue, publicURL) {
   for (const filename in assets) {
     if (REGEX_T.js.test(filename)) assetsMap = requireValue.require;
     else if (REGEX_T.css.test(filename)) assetsMap = requireValue.resource;
-    else break;
+    else continue;
     let name = path.join(publicURL, `${filename}`);
     assetsMap.set(filename, name);
     console.info(`📦${PluginName} bundle: ${filename}`);
