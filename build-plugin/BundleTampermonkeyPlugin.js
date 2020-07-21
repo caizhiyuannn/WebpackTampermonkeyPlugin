@@ -1,4 +1,5 @@
 const path = require('path');
+const url = require('url');
 const deepMerge = require('deepmerge');
 const { genMeta, envFileName, isEnvDevelopment } = require('./build-meta');
 const loadconfig = require('./load-config');
@@ -6,10 +7,9 @@ const loadconfig = require('./load-config');
 const REGEX_T = { js: /\.js$/, css: /\.css$/ };
 const PluginName = 'TampermonkeyPlugin';
 
-const combineMerge = (target, source, options) => {
+const combineMerge = function (target, source, options) {
   const destination = target.slice();
-
-  source.forEach((item, index) => {
+  source.forEach(function (item, index) {
     if (typeof destination[index] === 'undefined') {
       destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
     } else if (options.isMergeableObject(item)) {
@@ -34,20 +34,20 @@ function feedRequireValue(assets, requireValue, publicURL) {
 }
 function entryPointHandler(config, compilation) {
   const options = compilation.options;
+  const isHttps = options.devServer ? options.devServer.https : false;
+  const uri = url.parse(config.baseURL);
+  const re_host = options.devServer ? options.devServer.host : uri.hostname;
+  const re_port = options.devServer ? options.devServer.port : uri.port;
   const publicURL = options.output.publicURL;
-  const protocol = isEnvDevelopment
-    ? options.devServer.https
-      ? 'https'
-      : 'http'
-    : '';
-  const port = isEnvDevelopment ? options.devServer.port : '';
-  const host = isEnvDevelopment ? options.devServer.host : '';
+  const protocol = isEnvDevelopment ? (isHttps ? 'https' : 'http') : '';
+  const port = isEnvDevelopment ? re_port : '';
+  const host = isEnvDevelopment ? re_host : '';
   const requireValue = {
     require: new Map(),
-    resource: new Map()
+    resource: new Map(),
   };
   const assetsRequireConfig = { require: [], resource: [], grant: [] };
-  const combineURL = name => {
+  const combineURL = (name) => {
     const prefix = isEnvDevelopment
       ? `${protocol}://${host}:${port}`
       : config.baseURL;
@@ -67,7 +67,7 @@ function entryPointHandler(config, compilation) {
     if (requireValue.hasOwnProperty(assetsType)) {
       const element = requireValue[assetsType];
       assetsRequireConfig[assetsType] = Array.from(element.values()).map(
-        value => `${combineURL(value)}`
+        (value) => `${combineURL(value)}`
       );
     }
   }
@@ -83,7 +83,7 @@ function entryPointHandler(config, compilation) {
   console.info(`📦${PluginName} updateURL: ${updateMetaURL}`);
 
   config = deepMerge.all([config, updateMeta, assetsRequireConfig], {
-    arrayMerge: combineMerge
+    arrayMerge: combineMerge,
   });
   const filename = envFileName(config);
 
@@ -91,27 +91,27 @@ function entryPointHandler(config, compilation) {
 
   // fs.writeFileSync(requirePath, headers);
   compilation.assets[filename] = {
-    source: function() {
+    source: function () {
       return headers;
     },
-    size: function() {
+    size: function () {
       return headers.length;
-    }
+    },
   };
   // return headers;
 }
 
-class TampermonkeyPlugin {
-  name = PluginName;
+function TampermonkeyPlugin() {}
 
-  apply(compiler) {
-    compiler.hooks.emit.tapAsync(this.name, (compilation, callback) => {
-      const config = loadconfig.sync(process.cwd());
+TampermonkeyPlugin.prototype.apply = function (compiler) {
+  compiler.hooks.emit.tapAsync(PluginName, function (compilation, callback) {
+    const config = loadconfig.sync(process.cwd());
+    // console.log(Object.keys(compilation))
 
-      entryPointHandler(config, compilation);
+    entryPointHandler(config, compilation);
 
-      callback();
-    });
-  }
-}
+    callback();
+  });
+};
+
 module.exports = TampermonkeyPlugin;
