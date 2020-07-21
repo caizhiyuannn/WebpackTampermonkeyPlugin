@@ -32,12 +32,12 @@ module.exports = {
   environment: {
     production: {
       // 生产环境配置的URL环境，指定存储静态文件的baseURL，脚本自动会在每个需要加载的文件添加baseURL前缀。
-      // suffixParms 为后缀
+      // params 为后缀
       // 一些需要auth_code 可以用此方式让油猴能正常访问到文件
       // 最终require 会以 http://github.com/app.js?auth_code=xxx  这种形式
       other: {
         baseURL: 'http://github.com',
-        suffixParms: '?auth_code=xxxx',
+        params: '',
       },
     },
     development: {
